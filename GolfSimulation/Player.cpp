@@ -15,10 +15,14 @@ Player::Player(std::string playerName, int playerPower, int playerAccuracy, int 
 	power(playerPower),
 	accuracy(playerAccuracy),
 	control(playerControl),
-	strokes(1)
+	strokes(0)
 {
 }
 
 const void Player::addStroke() {
 	strokes++;
+}
+
+const void Player::addScore(int score) {
+	scoreCard.push_back(score);
 }

@@ -53,7 +53,7 @@ Simulation::Simulation(int playerCt, int holeCt, int minHoleLen, int maxHoleLen)
 
 const void Simulation::addRandomPlayer(std::string name) {
 	const float power = generateRandomNumber(100, 0);
-	const float accuracy = generateRandomNumber(100, 100);
+	const float accuracy = generateRandomNumber(100, 0);
 	const float control = generateRandomNumber(100, 0);
 	players.push_back(Player(name, power, accuracy, control));
 }
@@ -123,40 +123,60 @@ const float Simulation::calculateShotDistance(float plusMinusPercent, float club
 	const float distance = std::cos(2 * (2 * acos(0.0)) * (shotAngle / 360)) * ((clubRange < disFromHole) ? clubRange : disFromHole) * (1 - percentage);
 	const float d = ((clubRange < disFromHole) ? clubRange : disFromHole)* (1 - percentage);
 
+	/*
 	std::cout << "\nshot angle " << shotAngle << std::endl;
 	std::cout << "Shot Distance (no COS): " << d << std::endl;
 	std::cout << "Shot Distance offset Percentage: " << 1 - percentage << std::endl << std::endl << std::endl;
-
+	*/
 	return distance;
 }
 
 const int Simulation::playHole(int holeNumber, int playerNumber) {
-	Player player = players[playerNumber];
-	Hole hole = holes[holeNumber];
+	Player &player = players[playerNumber];
+	Hole &hole = holes[holeNumber];
 	float currentDisFromHole = hole.distance;
 	Club currentClub;
 
 	while (currentDisFromHole != 0) {
-		player.addStroke();
 		const float playerPowerMultiplier = calculatePlayerPowerMultiplier(player.power);
 		const float playerAccuracy = calculatePlayerAccuracy(player.accuracy);
 		const float playerControl= calculatePlayerControl(player.control);
+
 		for (int i = 0; i < clubs.size(); i++) {
-			if (i == clubs.size() - 1) {
+			bool isLastClub = i == clubs.size() - 1;
+			bool isDisLargerThanRange =  currentDisFromHole > clubs[i].clubRange * playerPowerMultiplier;
+			if (isLastClub) {
 				currentClub = (currentDisFromHole <= hole.greenSize) ?
 					clubs[i]
 					:
 					clubs[i - 1];
 			}
-			else if (clubs[i].clubRange * playerPowerMultiplier < currentDisFromHole) {
-				if (!(player.strokes != 0 && i == 0)) {
-					currentClub = (i == 0) ? 
-						clubs[i] 
-						: 
-						(player.strokes != 0) ?
-							clubs[i]
-						:
-							clubs[i - 1];
+			else if (isDisLargerThanRange) {
+				if (i == 0) {
+					if (player.strokes == 0) {
+						currentClub = clubs[i];
+					}
+					else {
+						continue;
+					}
+					break;
+				}
+				else if (player.strokes == 0) {
+					if (i == 1) {
+						currentClub = clubs[i];
+					}
+					else {
+						currentClub = clubs[i - 1];
+					}
+					break;
+				}
+				else {
+					if (i == 1) {
+						currentClub = clubs[i];
+					}
+					else {
+						currentClub = clubs[i - 1];
+					}
 					break;
 				}
 			}
@@ -165,15 +185,17 @@ const int Simulation::playHole(int holeNumber, int playerNumber) {
 		const float shotAngle = calculateShotAngle(playerAccuracy);
 		const float shotDistance= calculateShotDistance(playerControl, adjustedClubRange, currentDisFromHole, shotAngle);
 
-		std::cout << "Club Name: " << currentClub.clubName<< std::endl;
-		std::cout << "Club Range RAW: " << currentClub.clubRange << std::endl;
-		std::cout << "Club Range (calc): " << adjustedClubRange << std::endl;
-		std::cout << "Distance from hole: " << currentDisFromHole << std::endl;
-		std::cout << "Green size: " << hole.greenSize << std::endl << std::endl;
-
+		/*
+		std::cout << player.name << std::endl;
 		std::cout << "Power Rating RAW: " << player.power << std::endl;
 		std::cout << "Accuracy Rating RAW: " << player.accuracy << std::endl;
 		std::cout << "Control Rating RAW: " << player.control << std::endl << std::endl;
+
+		std::cout << "Distance from hole: " << currentDisFromHole << std::endl << std::endl;
+		std::cout << "Club Name: " << currentClub.clubName<< std::endl;
+		std::cout << "Club Range RAW: " << currentClub.clubRange << std::endl;
+		std::cout << "Club Range (calc): " << adjustedClubRange << std::endl;
+		std::cout << "Green size: " << hole.greenSize << std::endl << std::endl;
 
 		std::cout << "Shot Power (calc): " << playerPowerMultiplier << std::endl;
 		std::cout << "Shot Accuracy (calc): " << playerAccuracy << std::endl;
@@ -182,22 +204,30 @@ const int Simulation::playHole(int holeNumber, int playerNumber) {
 		std::cout << "Shot Distance (calc): " << shotDistance << std::endl << std::endl;
 
 		std::cout << std::endl;
+		*/
 
+		player.addStroke();
 		currentDisFromHole -= shotDistance;
 
 		if (currentDisFromHole <= hole.holeSize) {
-			std::cout << player.name << " Strokes: " << player.strokes << " Hole Length: " << hole.distance << std::endl;
+			player.addScore(player.strokes);
+			std::cout << player.scoreCard.size() << std::endl;
+			std::cout << player.strokes << std::endl;
+			/*
+			std::cout << player.name << " \nStrokes: " << player.strokes << " \nHole #" << holeNumber << " \nHole Length : " << hole.distance << std::endl;
+			std::cout << player.accuracy << " " << player.control << std::endl;
 			std::cout << "*********************************************\n" << std::endl;
+			*/
 			break;
 		}
-		std::cout << "---------------------------------------------\n" << std::endl;
+//		std::cout << "---------------------------------------------\n" << std::endl;
 	}
 
 	return 0;
 }
 
 const void Simulation::simulate() {
-	for (int h = 0; h < 1; h++) {
+	for (int h = 0; h < holeCount; h++) {
 		for (int p = 0; p < playerCount; p++) {
 			playHole(h, p);
 		}
