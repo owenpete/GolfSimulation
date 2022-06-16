@@ -11,7 +11,9 @@ class Player
 		int power;
 		int accuracy;
 		int control;
+		int strokes;
 		std::vector<int> scoreCard;
 		Player(std::string name, int power, int accuracy, int control);
+		const void addStroke();
 };
 

@@ -71,7 +71,7 @@ const float Simulation::generateRandomNumber(float max, float min) {
 	return number;
 }
 
-const float Simulation::calculatePlayerPower(int pwr) {
+const float Simulation::calculatePlayerPowerMultiplier(int pwr) {
 	/*
 		100 : 1.20
 		 50 : 1.00
@@ -102,9 +102,9 @@ const float Simulation::calculatePlayerAccuracy(int acc) {
 
 const float Simulation::calculatePlayerControl(int ctrl) {
 	/*
-		100 : 0.0050 50
-		 50 : 0.0125 125
-		  0 : 0.0200 200
+		100 : 0.0050
+		 50 : 0.0125
+		  0 : 0.0200
 	*/
 
 	const float controlCoefficient = 0.02f - (ctrl * 0.00015f);
@@ -120,57 +120,71 @@ const float Simulation::calculateShotAngle(float maxAngle) {
 const float Simulation::calculateShotDistance(float plusMinusPercent, float clubRange, float disFromHole) {
 	const float percentage = generateRandomNumber(plusMinusPercent, -plusMinusPercent);
 
-	std::cout << "Shot Distance offset Percentage: " << 1- percentage << std::endl << std::endl << std::endl;
+	//std::cout << "Shot Distance offset Percentage: " << 1 - percentage << std::endl << std::endl << std::endl;
 
 	return ((clubRange < disFromHole) ? clubRange : disFromHole) * (1 - percentage);
 }
 
 const int Simulation::playHole(int holeNumber, int playerNumber) {
-	const Player player = players[playerNumber];
-	const Hole hole = holes[holeNumber];
+	Player player = players[playerNumber];
+	Hole hole = holes[holeNumber];
 	float currentDisFromHole = hole.distance;
 	Club currentClub;
 
 	while (currentDisFromHole != 0) {
-		const float playerPower = calculatePlayerPower(player.power);
+		player.addStroke();
+		const float playerPowerMultiplier = calculatePlayerPowerMultiplier(player.power);
 		const float playerAccuracy = calculatePlayerAccuracy(player.accuracy);
 		const float playerControl= calculatePlayerControl(player.control);
 		for (int i = 0; i < clubs.size(); i++) {
-			if (clubs[i].clubRange * playerPower < currentDisFromHole) {
-				currentClub = (i == 0) ? clubs[i] : clubs[i - 1];
-				break;
+			if (i == clubs.size() - 1) {
+				currentClub = (currentDisFromHole <= hole.greenSize) ?
+					clubs[i]
+					:
+					clubs[i - 1];
 			}
-			else if (i == clubs.size() - 1) {
-				currentClub = clubs[clubs.size() - 1];
+			else if (clubs[i].clubRange * playerPowerMultiplier < currentDisFromHole) {
+				if (!(player.strokes != 0 && i == 0)) {
+					currentClub = (i == 0) ? 
+						clubs[i] 
+						: 
+						(player.strokes != 0) ?
+							clubs[i]
+						:
+							clubs[i - 1];
+					break;
+				}
 			}
 		}
-		const float adjustedClubRange = playerPower * currentClub.clubRange;
+		const float adjustedClubRange = playerPowerMultiplier * currentClub.clubRange;
 		const float shotAngle = calculateShotAngle(playerAccuracy);
 		const float shotDistance= calculateShotDistance(playerControl, adjustedClubRange, currentDisFromHole);
 
 		std::cout << "Club Name: " << currentClub.clubName<< std::endl;
 		std::cout << "Club Range RAW: " << currentClub.clubRange << std::endl;
 		std::cout << "Club Range (calc): " << adjustedClubRange << std::endl;
-		std::cout << "Distance from hole: " << currentDisFromHole << std::endl << std::endl;
+		std::cout << "Distance from hole: " << currentDisFromHole << std::endl;
+		std::cout << "Green size: " << hole.greenSize << std::endl << std::endl;
 
 		std::cout << "Power Rating RAW: " << player.power << std::endl;
 		std::cout << "Accuracy Rating RAW: " << player.accuracy << std::endl;
 		std::cout << "Control Rating RAW: " << player.control << std::endl << std::endl;
 
-		std::cout << "Shot Power (calc): " << playerPower << std::endl;
+		std::cout << "Shot Power (calc): " << playerPowerMultiplier << std::endl;
 		std::cout << "Shot Accuracy (calc): " << playerAccuracy << std::endl;
 		std::cout << "Shot Control (calc): " << playerControl << std::endl;
 		std::cout << "Shot Angle (calc): " << shotAngle << std::endl;
 		std::cout << "Shot Distance (calc): " << shotDistance << std::endl << std::endl;
 
 		std::cout << std::endl;
-
 		currentDisFromHole -= shotDistance;
 
-		std::cout << "Distance from Hole after shot: " << currentDisFromHole << std::endl;
-		std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
+		if (currentDisFromHole <= hole.holeSize) {
+			std::cout << player.name << " Strokes: " << player.strokes << " Hole Length: " << hole.distance << std::endl;
+			std::cout << "-----------------------------------------------\n" << std::endl;
+			break;
+		}
 
-		break;
 	}
 
 	return 0;

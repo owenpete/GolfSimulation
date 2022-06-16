@@ -23,7 +23,7 @@ class Simulation
 		const void addCustomPlayer(std::string name, int power, int accuracy, int control);
 		const std::vector<Player> getPlayerList();
 		const float generateRandomNumber(float max, float min = 0);
-		const float calculatePlayerPower(int pwr);
+		const float calculatePlayerPowerMultiplier(int pwr);
 		const float calculatePlayerAccuracy(int acc);
 		const float calculatePlayerControl(int ctrl);
 		const float calculateShotAngle(float maxAngle);
