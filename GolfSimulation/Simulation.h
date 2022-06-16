@@ -27,7 +27,7 @@ class Simulation
 		const float calculatePlayerAccuracy(int acc);
 		const float calculatePlayerControl(int ctrl);
 		const float calculateShotAngle(float maxAngle);
-		const float calculateShotDistance(float plusMinusPercent, float clubRange, float disFromHole);
+		const float calculateShotDistance(float plusMinusPercent, float clubRange, float disFromHole, float shotAngle);
 		const int playHole(int holeNumber, int playerNumber);
 		const void simulate();
 };

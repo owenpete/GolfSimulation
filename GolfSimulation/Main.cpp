@@ -7,7 +7,7 @@ int main() {
 	int holeCount = 18;
 	int playerCount = 1;
 
-	Simulation sim(playerCount, holeCount, 800, 800);
+	Simulation sim(playerCount, holeCount);
 
 	for (int i = 0; i < playerCount; i++) {
 		std::stringstream ss;

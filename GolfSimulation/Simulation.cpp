@@ -3,6 +3,7 @@
 #include <map>
 #include <cstdlib>
 #include <ctime>
+#include <math.h>
 
 #include "Simulation.h"
 #include "Player.h"
@@ -52,7 +53,7 @@ Simulation::Simulation(int playerCt, int holeCt, int minHoleLen, int maxHoleLen)
 
 const void Simulation::addRandomPlayer(std::string name) {
 	const float power = generateRandomNumber(100, 0);
-	const float accuracy = generateRandomNumber(100, 0);
+	const float accuracy = generateRandomNumber(100, 100);
 	const float control = generateRandomNumber(100, 0);
 	players.push_back(Player(name, power, accuracy, control));
 }
@@ -90,12 +91,12 @@ const float Simulation::calculatePlayerAccuracy(int acc) {
 	/*
 		in angles
 
-		100 : 10
-		 50 : 30
-		  0 : 50 
+		100 : 5 
+		 50 : 10 
+		  0 : 15 
 	*/
 
-	const float accuracyCoefficient = 50 - (acc * 0.4f);
+	const float accuracyCoefficient = 15 - (acc * 0.1f);
 	
 	return accuracyCoefficient;
 }
@@ -117,12 +118,16 @@ const float Simulation::calculateShotAngle(float maxAngle) {
 	return angle;
 }
 
-const float Simulation::calculateShotDistance(float plusMinusPercent, float clubRange, float disFromHole) {
+const float Simulation::calculateShotDistance(float plusMinusPercent, float clubRange, float disFromHole, float shotAngle) {
 	const float percentage = generateRandomNumber(plusMinusPercent, -plusMinusPercent);
+	const float distance = std::cos(2 * (2 * acos(0.0)) * (shotAngle / 360)) * ((clubRange < disFromHole) ? clubRange : disFromHole) * (1 - percentage);
+	const float d = ((clubRange < disFromHole) ? clubRange : disFromHole)* (1 - percentage);
 
-	//std::cout << "Shot Distance offset Percentage: " << 1 - percentage << std::endl << std::endl << std::endl;
+	std::cout << "\nshot angle " << shotAngle << std::endl;
+	std::cout << "Shot Distance (no COS): " << d << std::endl;
+	std::cout << "Shot Distance offset Percentage: " << 1 - percentage << std::endl << std::endl << std::endl;
 
-	return ((clubRange < disFromHole) ? clubRange : disFromHole) * (1 - percentage);
+	return distance;
 }
 
 const int Simulation::playHole(int holeNumber, int playerNumber) {
@@ -158,7 +163,7 @@ const int Simulation::playHole(int holeNumber, int playerNumber) {
 		}
 		const float adjustedClubRange = playerPowerMultiplier * currentClub.clubRange;
 		const float shotAngle = calculateShotAngle(playerAccuracy);
-		const float shotDistance= calculateShotDistance(playerControl, adjustedClubRange, currentDisFromHole);
+		const float shotDistance= calculateShotDistance(playerControl, adjustedClubRange, currentDisFromHole, shotAngle);
 
 		std::cout << "Club Name: " << currentClub.clubName<< std::endl;
 		std::cout << "Club Range RAW: " << currentClub.clubRange << std::endl;
@@ -177,14 +182,15 @@ const int Simulation::playHole(int holeNumber, int playerNumber) {
 		std::cout << "Shot Distance (calc): " << shotDistance << std::endl << std::endl;
 
 		std::cout << std::endl;
+
 		currentDisFromHole -= shotDistance;
 
 		if (currentDisFromHole <= hole.holeSize) {
 			std::cout << player.name << " Strokes: " << player.strokes << " Hole Length: " << hole.distance << std::endl;
-			std::cout << "-----------------------------------------------\n" << std::endl;
+			std::cout << "*********************************************\n" << std::endl;
 			break;
 		}
-
+		std::cout << "---------------------------------------------\n" << std::endl;
 	}
 
 	return 0;
