@@ -8,6 +8,7 @@ int power;
 int accuracy;
 int control;
 int strokes;
+int totalStrokes;
 std::vector<int> scoreCard;
 int totalScore;
 
@@ -17,13 +18,18 @@ Player::Player(std::string playerName, int playerPower, int playerAccuracy, int 
 	accuracy(playerAccuracy),
 	control(playerControl),
 	strokes(0),
+	totalStrokes(0),
 	totalScore(0)
 {
 }
 
 const void Player::addStroke() {
 	strokes++;
-	totalScore++;
+	totalStrokes++;
+}
+
+const void Player::addTotalScore(int strokes, int par) {
+	totalScore += strokes - par;
 }
 
 const void Player::resetStrokes() {

@@ -28,6 +28,6 @@ class Simulation
 		const float calculateShotDistance(float plusMinusPercent, float clubRange, float disFromHole, float shotAngle);
 		const int playHole(int holeNumber, int playerNumber);
 		const void simulate();
-		const void displayLeaderboard(char mode = 'n');
+		const void displayLeaderboard();
 };
 

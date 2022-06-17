@@ -5,6 +5,7 @@ class Hole
 		int distance;
 		int greenSize;
 		float holeSize;
+		int par;
 
 		Hole(int dist, int greenSz);
 };
