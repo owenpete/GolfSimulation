@@ -4,10 +4,10 @@
 #include "Simulation.h"
 
 int main() {
-	int holeCount = 2;
-	int playerCount = 1;
+	int holeCount = 18;
+	int playerCount = 8;
 
-	Simulation sim(playerCount, holeCount, 800, 800);
+	Simulation sim(playerCount, holeCount, 10000, 10000);
 
 	for (int i = 0; i < playerCount; i++) {
 		std::stringstream ss;
@@ -16,6 +16,7 @@ int main() {
 	}
 
 	sim.simulate();
+	sim.displayLeaderboard('c');
 
 	return 0;
 }

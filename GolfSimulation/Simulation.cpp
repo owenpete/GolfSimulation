@@ -1,9 +1,12 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <map>
 #include <cstdlib>
 #include <ctime>
 #include <math.h>
+#include <algorithm>
+#include <sstream>
 
 #include "Simulation.h"
 #include "Player.h"
@@ -211,18 +214,10 @@ const int Simulation::playHole(int holeNumber, int playerNumber) {
 
 		if (currentDisFromHole <= hole.holeSize) {
 			player.addScore(player.strokes);
-			std::cout << player.scoreCard.size() << std::endl;
-			std::cout << player.strokes << std::endl;
-			/*
-			std::cout << player.name << " \nStrokes: " << player.strokes << " \nHole #" << holeNumber << " \nHole Length : " << hole.distance << std::endl;
-			std::cout << player.accuracy << " " << player.control << std::endl;
-			std::cout << "*********************************************\n" << std::endl;
-			*/
+			player.resetStrokes();
 			break;
 		}
-//		std::cout << "---------------------------------------------\n" << std::endl;
 	}
-
 	return 0;
 }
 
@@ -231,5 +226,39 @@ const void Simulation::simulate() {
 		for (int p = 0; p < playerCount; p++) {
 			playHole(h, p);
 		}
+	}
+}
+
+const bool compairScores(Player first, Player second) {
+	return (first.totalScore < second.totalScore);
+}
+const void Simulation::displayLeaderboard(char mode) {
+	std::vector<Player> playersCopy = players;
+	std::sort(playersCopy.begin(), playersCopy.end(), compairScores);
+	for (int i = 0; i < playersCopy.size(); i++) {
+		Player player = playersCopy[i];
+
+		switch (mode) {
+			case 'n':
+				std::cout <<
+					i + 1 << ") " << "\033[36;1m" << player.name << " - " << "\033[33;1m" << player.totalScore << "\033[0m\n" <<
+					"\nP: \033[31;1m" << player.power << "\033[0m / 100" <<
+					"\nA: \033[32;1m" << player.accuracy << "\033[0m / 100" <<
+					"\nC: \033[34;1m" << player.control << "\033[0m / 100" <<
+					"\n" <<
+					std::endl;
+				break;
+			case 'c':
+				std::cout <<
+					' ' << std::setfill(' ') << std::setw(4) << i + 1 << ")" << ' ' << std::setfill(' ') << std::setw(15) << player.name << " | " <<
+					"\033[31;1m" << std::setfill(' ') << std::setw(3) << player.power << 
+					"\033[0m" << ' ' << "\033[32;1m" << std::setfill(' ') << std::setw(3) << player.accuracy << "\033[0m" << ' ' << 
+					"\033[34;1m" << std::setfill(' ') << std::setw(3) << player.control << "\033[0m" << ' ' <<
+					" | " << "\033[33;1m" << std::setfill(' ') << std::setw(3) << player.totalScore << "\033[0m" <<
+					std::endl;
+				break;
+		}
+
+		std::cout << "---------------------------------------" << std::endl;
 	}
 }
