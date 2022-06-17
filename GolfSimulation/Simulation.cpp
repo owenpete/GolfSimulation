@@ -13,19 +13,15 @@
 #include "Hole.h"
 #include "Club.h"
 
-int holeCount;
 // green size 20 - 27 yards
 int minGreenSize;
 int maxGreenSize;
 std::vector<Hole> holes; // in yards
-int playerCount;
 std::vector<Player> players;
 std::vector<Club> clubs;
 std::map<std::string, int>::iterator clubsIter;
 
-Simulation::Simulation(int playerCt, int holeCt, int minHoleLen, int maxHoleLen) :
-	playerCount(playerCt),
-	holeCount(holeCt),
+Simulation::Simulation(int holeCount, int minHoleLen, int maxHoleLen) :
 	clubs({
 		 Club("driver", 320),
 		 Club("3Wood", 300),
@@ -222,8 +218,8 @@ const int Simulation::playHole(int holeNumber, int playerNumber) {
 }
 
 const void Simulation::simulate() {
-	for (int h = 0; h < holeCount; h++) {
-		for (int p = 0; p < playerCount; p++) {
+	for (int h = 0; h < holes.size(); h++) {
+		for (int p = 0; p < players.size(); p++) {
 			playHole(h, p);
 		}
 	}
